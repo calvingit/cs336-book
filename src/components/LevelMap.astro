@@ -1,12 +1,13 @@
 ---
 // src/components/LevelMap.astro
 // 首页游戏地图：五关闯关路线 + 星星进度（localStorage 持久化）
+const base = import.meta.env.BASE_URL;
 const levels = [
-  { n: 1, emoji: '🧱', name: '字变积木',     desc: '电脑怎么把一句话切成小块？',   href: '/kids/01-token-blocks/' },
-  { n: 2, emoji: '🎮', name: '词语接龙',     desc: 'AI 最大的秘密：猜下一个字',    href: '/kids/02-word-guess/' },
-  { n: 3, emoji: '👀', name: '眼睛看哪里',   desc: '读到"它"，怎么知道指谁？',     href: '/kids/03-attention/' },
-  { n: 4, emoji: '⛰️', name: '不断改错',     desc: '机器人怎么越练越聪明？',       href: '/kids/04-hill-climb/' },
-  { n: 5, emoji: '🍬', name: '好老师好教材', desc: '怎么教它懂礼貌、会帮忙？',     href: '/kids/05-reward/' },
+  { n: 1, emoji: '🧱', name: '字变积木',     desc: '电脑怎么把一句话切成小块？',   href: `${base}/kids/01-token-blocks/` },
+  { n: 2, emoji: '🎮', name: '词语接龙',     desc: 'AI 最大的秘密：猜下一个字',    href: `${base}/kids/02-word-guess/` },
+  { n: 3, emoji: '👀', name: '眼睛看哪里',   desc: '读到"它"，怎么知道指谁？',     href: `${base}/kids/03-attention/` },
+  { n: 4, emoji: '⛰️', name: '不断改错',     desc: '机器人怎么越练越聪明？',       href: `${base}/kids/04-hill-climb/` },
+  { n: 5, emoji: '🍬', name: '好老师好教材', desc: '怎么教它懂礼貌、会帮忙？',     href: `${base}/kids/05-reward/` },
 ];
 const cfg = JSON.stringify(levels);
 ---
@@ -20,7 +21,7 @@ const cfg = JSON.stringify(levels);
     <div class="map-prog-txt" id="mp-txt">已点亮 0 / 5 颗星</div>
   </div>
   <div class="map-path" id="mp-path" data-levels={cfg}></div>
-  <a class="lvl secret" href="/secret/">
+  <a class="lvl secret" href={`${base}/secret/`}>
     <div class="lvl-num">🗺️</div>
     <div class="lvl-body"><p class="lvl-name">秘密关卡 · 长大后再玩</p><p class="lvl-desc">GPU、超大训练、缩放定律…</p></div>
     <div class="lvl-star">🔒</div>
