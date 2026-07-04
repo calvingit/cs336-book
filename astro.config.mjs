@@ -6,6 +6,8 @@ import rehypeKatex from 'rehype-katex';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://calvingit.github.io',
+	base: '/cs336-book',
 	integrations: [
 		starlight({
 			title: 'CS336 — 从玩具到真相',
