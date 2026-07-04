@@ -1,0 +1,43 @@
+---
+const tabs = [
+  { id: 'play', label: '🧱 玩一玩', hint: '给所有人' },
+  { id: 'do',   label: '🔧 动手做', hint: '想试代码' },
+  { id: 'deep', label: '📚 深进去', hint: '想钻原理' },
+];
+---
+<div class="layer-tabs" data-layer-tabs>
+  <div class="layer-nav" role="tablist">
+    {tabs.map((t, i) => (
+      <button class:list={["layer-btn", { active: i === 0 }]} data-target={t.id} role="tab">
+        <span class="layer-label">{t.label}</span>
+        <span class="layer-hint">{t.hint}</span>
+      </button>
+    ))}
+  </div>
+  <div class="layer-panel active" data-panel="play"><slot name="play" /></div>
+  <div class="layer-panel" data-panel="do"><slot name="do" /></div>
+  <div class="layer-panel" data-panel="deep"><slot name="deep" /></div>
+</div>
+<script>
+  document.querySelectorAll('[data-layer-tabs]').forEach((box) => {
+    const btns = box.querySelectorAll('.layer-btn');
+    const panels = box.querySelectorAll('.layer-panel');
+    btns.forEach((btn) => btn.addEventListener('click', () => {
+      const target = btn.getAttribute('data-target');
+      btns.forEach((b) => b.classList.toggle('active', b === btn));
+      panels.forEach((p) => p.classList.toggle('active', p.getAttribute('data-panel') === target));
+    }));
+  });
+</script>
+<style>
+  .layer-tabs { margin: 1.4rem 0; }
+  .layer-nav { display: flex; gap: 8px; margin-bottom: 14px; }
+  .layer-btn { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 2px solid #e6d6f5; border-radius: 14px; background: #fff; cursor: pointer; transition: all .15s; }
+  .layer-btn:hover { border-color: #c9a8ee; }
+  .layer-btn.active { background: linear-gradient(135deg,#f3e6ff,#e6f0ff); border-color: #a97fe0; }
+  .layer-label { font-size: 15px; font-weight: 700; color: #6a3fa0; }
+  .layer-hint { font-size: 11px; color: #9a8fb0; }
+  .layer-panel { display: none; }
+  .layer-panel.active { display: block; animation: fade .2s; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
+</style>

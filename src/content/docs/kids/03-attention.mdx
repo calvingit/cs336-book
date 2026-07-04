@@ -1,0 +1,100 @@
+---
+title: "第三关：机器人的眼睛看哪里？"
+description: 读懂长句子的秘密——注意力，知道该回头看哪个词。
+sidebar:
+  order: 3
+  badge: { text: 第3关, variant: tip }
+---
+
+import LayerTabs from '../../../components/LayerTabs.astro';
+import AttentionDraw from '../../../components/AttentionDraw.astro';
+import PyRunner from '../../../components/PyRunner.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Callout emoji="🎯">
+**这一关你会学到：** 读长句子时，机器人怎么知道「它」「他」「那个」到底在说谁？靠的是一双会**回头看**的眼睛。
+**预计好玩时间：** 大约 20 分钟。
+</Callout>
+
+<LayerTabs>
+
+<Fragment slot="play">
+
+## 🎮 先来玩个游戏
+
+读这句话：「小猫追着毛线球，因为**它**很好奇。」
+这里的「它」是谁？是毛线球吗？——不对，是**小猫**！你的脑子一瞬间就回头看了前面。
+
+机器人读到「它」的时候，也要回头看前面的词。你来帮它找找看，点一个词试试 👇
+
+<AttentionDraw
+  words={['小','猫','追','着','毛','线','球','，','因','为','它','很','好','奇']}
+  target={10}
+  answer={1}
+  weights={{ 0: 8, 1: 62, 2: 10, 6: 12, 13: 8 }}
+/>
+
+答对之后，看下面那排橙色的条——那是机器人的小秘密：
+它其实**不是只看「猫」一个词，而是同时瞄了所有词，只是看「猫」时用的力气最大**。就像你在人群里找妈妈，眼睛会扫过很多人，但停留在妈妈身上最久。
+
+**动手玩一玩：** 想一句自己的话，比如「弟弟把苹果给了妹妹，因为她饿了」——这里的「她」该连到哪个词？
+
+<Callout emoji="✏️" title="离屏小实验（可打印）">
+发一张印着句子的纸，让小朋友用**彩色笔画箭头**：每个「它/他/她/那个」都画一根箭头指回它真正代表的词。画得越准，说明你越懂这句话——机器人也是这样"画箭头"的。
+</Callout>
+
+</Fragment>
+
+<Fragment slot="do">
+
+## 🔧 自己跑一段真代码
+
+机器人怎么决定"用多大力气看每个词"？它先给每个词打一个**相关度分数**，再把这些分数变成一份**加起来正好是 100% 的注意力**。
+下面的代码就在做这件事。**试着把「猫」的分数从 `9` 改大或改小，看看注意力怎么变**：
+
+<PyRunner code={`import math
+
+# 机器人读"它"时，觉得前面每个词和它有多相关（相关度分数）
+words  = ["小猫", "毛线", "球", "好奇"]
+scores = [9.0, 2.0, 3.0, 4.0]   # 试着改"小猫"的分数看看！
+
+# 把分数变成"注意力"（加起来 = 100%），这一步叫 softmax
+exp = [math.exp(s) for s in scores]
+total = sum(exp)
+attention = [e / total for e in exp]
+
+print("机器人读「它」时，眼睛的用力分配：")
+for w, a in zip(words, attention):
+    bar = "█" * round(a * 30)
+    print(f"  {w:>4} | {bar} {a*100:.0f}%")`} />
+
+**观察：** 「小猫」分数最高，就分到最多注意力；改小它的分数，注意力就被别的词抢走了。
+把所有分数变成"加起来是 100% 的一份注意力"，这一步的真名字叫 **softmax**。
+
+</Fragment>
+
+<Fragment slot="deep">
+
+## 📚 想钻得更深？
+
+你刚才玩的，就是让今天所有大模型成为可能的机制——**注意力(Attention)**，出自 2017 年那篇著名论文《Attention Is All You Need》。
+
+- 每个词会生成三样东西:**Query(我在找什么)**、**Key(我是什么)**、**Value(我能提供什么)**。读某个词时，用它的 Query 去和所有词的 Key 做匹配，算出相关度分数。
+- 分数经过 **softmax** 变成注意力权重 α_i = exp(q·k_i / √d) / Σ_j exp(q·k_j / √d)，再用这些权重去加权求和所有词的 Value——这就是这个词"读懂"后的新含义。
+- 把这套机制堆很多层、并行很多组，就是 **Transformer**。
+- 📄 对应课程：**L3 — 架构与超参数**、**L4 — Attention 替代方案 & MoE**
+- 💻 对应作业：**作业 1**——你会亲手用 PyTorch 实现缩放点积注意力和多头注意力
+- 🔗 必读论文：Vaswani et al. 2017《Attention Is All You Need》
+
+</Fragment>
+
+</LayerTabs>
+
+<Callout emoji="🏅">
+**恭喜通关！** 点亮第三颗星 ⭐⭐⭐
+你已经懂了大模型最厉害的本领：**读一个词时，知道该回头看哪些词**。
+下一关：**《不断改错的机器人》**——机器人一开始笨笨的，它是怎么越练越聪明的？
+</Callout>
+
+<button id="done-btn-3" class="done-btn" onclick="localStorage.setItem('cs336kids_progress', JSON.stringify({...JSON.parse(localStorage.getItem('cs336kids_progress') || '{}'), [3]: true})); this.textContent='⭐ 已点亮！'; this.disabled=true; this.style.background='linear-gradient(135deg,#5bb37a,#7ed09a)'; window.dispatchEvent(new CustomEvent('cs336-progress'))">🏅 我学完啦，点亮这颗星！</button>
+

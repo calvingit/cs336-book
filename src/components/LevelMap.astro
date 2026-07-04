@@ -1,0 +1,88 @@
+---
+// src/components/LevelMap.astro
+// 首页游戏地图：五关闯关路线 + 星星进度（localStorage 持久化）
+const levels = [
+  { n: 1, emoji: '🧱', name: '字变积木',     desc: '电脑怎么把一句话切成小块？',   href: '/kids/01-token-blocks/' },
+  { n: 2, emoji: '🎮', name: '词语接龙',     desc: 'AI 最大的秘密：猜下一个字',    href: '/kids/02-word-guess/' },
+  { n: 3, emoji: '👀', name: '眼睛看哪里',   desc: '读到"它"，怎么知道指谁？',     href: '/kids/03-attention/' },
+  { n: 4, emoji: '⛰️', name: '不断改错',     desc: '机器人怎么越练越聪明？',       href: '/kids/04-hill-climb/' },
+  { n: 5, emoji: '🍬', name: '好老师好教材', desc: '怎么教它懂礼貌、会帮忙？',     href: '/kids/05-reward/' },
+];
+const cfg = JSON.stringify(levels);
+---
+<div class="map-wrap">
+  <div class="map-head">
+    <h1 class="map-title">🤖 从零看懂大模型</h1>
+    <p class="map-sub">五个关卡，边玩边懂 ChatGPT 是怎么工作的！</p>
+  </div>
+  <div class="map-prog">
+    <div class="map-prog-track"><div class="map-prog-fill" id="mp-fill"></div></div>
+    <div class="map-prog-txt" id="mp-txt">已点亮 0 / 5 颗星</div>
+  </div>
+  <div class="map-path" id="mp-path" data-levels={cfg}></div>
+  <a class="lvl secret" href="/secret/">
+    <div class="lvl-num">🗺️</div>
+    <div class="lvl-body"><p class="lvl-name">秘密关卡 · 长大后再玩</p><p class="lvl-desc">GPU、超大训练、缩放定律…</p></div>
+    <div class="lvl-star">🔒</div>
+  </a>
+  <button class="map-reset" id="mp-reset">重置进度</button>
+</div>
+
+<script>
+  import { getProgress, resetProgress } from '../utils/progress.js';
+  const path = document.getElementById('mp-path');
+  const levels = JSON.parse(path.getAttribute('data-levels'));
+  const fill = document.getElementById('mp-fill');
+  const txt  = document.getElementById('mp-txt');
+
+  function render() {
+    const done = getProgress();
+    path.innerHTML = '';
+    levels.forEach((l) => {
+      const a = document.createElement('a');
+      a.className = 'lvl'; a.href = l.href;
+      a.innerHTML =
+        `<div class="lvl-num">${l.emoji}</div>
+         <div class="lvl-body"><p class="lvl-name">第${l.n}关 · ${l.name}</p><p class="lvl-desc">${l.desc}</p></div>
+         <div class="lvl-star">${done[l.n] ? '⭐' : '☆'}</div>`;
+      path.appendChild(a);
+    });
+    const c = levels.filter((l) => done[l.n]).length;
+    fill.style.width = (c / levels.length * 100) + '%';
+    txt.textContent = `已点亮 ${c} / ${levels.length} 颗星` + (c === levels.length ? '　🎉 全部通关！' : '');
+  }
+
+  document.getElementById('mp-reset').addEventListener('click', () => { resetProgress(); render(); });
+  window.addEventListener('cs336-progress', render);
+  render();
+</script>
+
+<style>
+  .map-wrap { max-width: 680px; margin: 0 auto; padding: 24px;
+    background: linear-gradient(160deg,#eef4ff 0%,#fef0f8 50%,#f0fff6 100%);
+    border-radius: 22px; border: 2px solid #e0d0f5; }
+  .map-head { text-align: center; margin-bottom: 6px; }
+  .map-title { font-size: 24px; font-weight: 800; color: #6a3fa0; margin: 0; }
+  .map-sub { font-size: 13px; color: #8a7fa8; margin: 6px 0 0; }
+  .map-prog { margin: 16px auto 22px; max-width: 360px; }
+  .map-prog-track { height: 14px; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e0d0f5; }
+  .map-prog-fill { height: 100%; width: 0; background: linear-gradient(90deg,#ffd15b,#ff9f5b); transition: width .5s; }
+  .map-prog-txt { text-align: center; font-size: 12px; color: #8a7fa8; margin-top: 6px; }
+  .map-path { display: flex; flex-direction: column; gap: 14px; }
+  .lvl { display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-bottom: 14px;
+    background: #fff; border-radius: 16px; border: 2px solid #eadcf7; cursor: pointer;
+    transition: transform .12s, box-shadow .12s; text-decoration: none; }
+  .lvl:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(140,90,200,.15); }
+  .lvl-num { flex: none; width: 44px; height: 44px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 22px;
+    background: linear-gradient(135deg,#f3e6ff,#e6f0ff); }
+  .lvl-body { flex: 1; }
+  .lvl-name { font-size: 16px; font-weight: 700; color: #5a3f8a; margin: 0; }
+  .lvl-desc { font-size: 12px; color: #9a8fb0; margin: 2px 0 0; }
+  .lvl-star { font-size: 18px; letter-spacing: 1px; }
+  .secret { background: linear-gradient(135deg,#2a2140,#3a2f5a); border-color: #4a3f6a; }
+  .secret .lvl-name { color: #ffe08a; }
+  .secret .lvl-desc { color: #b0a0d0; }
+  .map-reset { display: block; margin: 4px auto 0; padding: 6px 16px; font-size: 12px;
+    color: #8a7fa8; background: #fff; border: 1px solid #e0d0f5; border-radius: 8px; cursor: pointer; }
+</style>

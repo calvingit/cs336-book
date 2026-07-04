@@ -1,24 +1,29 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 // https://astro.build/config
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'My Docs',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			title: 'CS336 — 从玩具到真相',
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/calvingit/learn-cs336' }],
+			markdown: {
+				remarkPlugins: [remarkMath],
+				rehypePlugins: [rehypeKatex],
+			},
 			sidebar: [
 				{
-					label: 'Guides',
+					label: '🚀 新手村',
 					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
+						{ label: '欢迎', slug: 'kids/01-token-blocks' },
 					],
 				},
 				{
-					label: 'Reference',
-					items: [{ autogenerate: { directory: 'reference' } }],
+					label: '互动关卡',
+					items: [{ autogenerate: { directory: 'kids' } }],
 				},
 			],
 		}),

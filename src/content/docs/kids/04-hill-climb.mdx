@@ -1,0 +1,94 @@
+---
+title: "第四关：不断改错的机器人"
+description: 机器人一开始笨笨的，它靠"每次改一点点"越练越聪明——这就是训练。
+sidebar:
+  order: 4
+  badge: { text: 第4关, variant: tip }
+---
+
+import LayerTabs from '../../../components/LayerTabs.astro';
+import HillClimb from '../../../components/HillClimb.astro';
+import PyRunner from '../../../components/PyRunner.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Callout emoji="🎯">
+**这一关你会学到：** 机器人刚出生时又笨又爱猜错，它是怎么靠"每次改一点点"变聪明的？
+**预计好玩时间：** 大约 20 分钟。
+</Callout>
+
+<LayerTabs>
+
+<Fragment slot="play">
+
+## 🎮 先来玩个游戏
+
+想象你**蒙着眼睛**站在一座山的半山腰，看不见谷底在哪。但你能用脚感觉出——脚下是往上斜还是往下斜。
+想走到最低的谷底，你会怎么做？很简单：**每一步都朝"感觉往下"的方向挪一点点**。走着走着，就到谷底了。
+
+下面的机器人就蒙着眼站在山坡上。点按钮帮它一步步走到最低处 👇
+
+<HillClimb start={60} bottom={210} />
+
+这座"山"其实代表**机器人犯的错有多大**：山越高 = 错得越离谱，山谷 = 错得最少的地方。
+机器人训练，就是蒙着眼一步步走到"错最少"的谷底。
+
+**动手玩一玩：** 拖动「步子大小」滑块——
+- 调**很大**再走：机器人会怎样？(它会一步跨过头，在谷底两边来回蹦!)
+- 调**很小**再走：它走得快还是慢?
+这个"步子大小"有个真名字，叫 **学习率**。步子要不大不小，刚刚好，机器人才学得又快又稳。
+
+<Callout emoji="✏️" title="离屏小实验（可打印/教室里玩）">
+蒙眼版"热和冷"：一个小朋友蒙眼当机器人，目标是走到房间某个点。其他人只能喊"热"(更近)或"冷"(更远)。
+蒙眼的人根据提示一步步调整方向——他做的事，和机器人训练一模一样！
+</Callout>
+
+</Fragment>
+
+<Fragment slot="do">
+
+## 🔧 自己跑一段真代码
+
+下面的代码让机器人自动下山。`错误` 会一步步变小，直到几乎为 0。
+**把 `学习率` 从 `0.1` 改成 `1.1` 再运行**，看看会发生什么可怕的事(错误不但不变小，反而越来越大)！
+
+<PyRunner code={`位置 = 6.0        # 机器人一开始站的地方
+学习率 = 0.1       # 步子大小，试试改成 1.1！
+
+print("目标：走到 0（谷底，错误最小）")
+for 第几步 in range(10):
+    错误 = 位置 ** 2          # 山的高度 = 错误大小
+    坡度 = 2 * 位置           # 脚下的坡度
+    位置 = 位置 - 学习率 * 坡度  # 朝低处挪一点点
+    print(f"  第{第几步+1}步：错误 = {错误:.3f}，机器人挪到了 {位置:.3f}")`} />
+
+**观察：** 学习率 `0.1` 时，错误一路变小，机器人稳稳走到谷底；
+改成 `1.1` 时，步子太大，机器人越蹦越远，错误直接"爆炸"——这就是真实训练里最常见的翻车。
+
+</Fragment>
+
+<Fragment slot="deep">
+
+## 📚 想钻得更深？
+
+你刚才做的，就是深度学习的核心引擎——**梯度下降(Gradient Descent)**。
+
+- 那座"山"叫**损失函数(Loss)**，衡量模型预测得有多错；山谷就是损失最小的参数。
+- "脚下的坡度"就是**梯度(Gradient)**——损失对参数的导数，告诉我们往哪个方向改、改多少。
+- 更新规则：θ ← θ - η·∇θL，其中 η 就是你刚才拖的**学习率**。太大会震荡发散，太小收敛太慢。
+- 真实训练不会用最原始的梯度下降，而是用更聪明的**优化器**(带动量、自适应步长)，比如 **Adam / AdamW**——它会给每个参数自动调"步子大小"。
+- 📄 对应课程：**L2 — PyTorch、资源计算**、优化器相关内容
+- 💻 对应作业：**作业 1**——你会亲手实现 AdamW 优化器并训练一个小语言模型
+- 🔗 必读论文：Kingma & Ba 2014《Adam》、Loshchilov & Hutter 2017《AdamW》
+
+</Fragment>
+
+</LayerTabs>
+
+<Callout emoji="🏅">
+**恭喜通关！** 点亮第四颗星 ⭐⭐⭐⭐
+你已经懂了机器人变聪明的秘密：**每次犯错，就朝对的方向改一点点**。
+下一关(最后一关)：**《好老师和好教材》**——为什么喂给机器人的东西，决定了它能变多聪明、多懂礼貌？
+</Callout>
+
+<button id="done-btn-4" class="done-btn" onclick="localStorage.setItem('cs336kids_progress', JSON.stringify({...JSON.parse(localStorage.getItem('cs336kids_progress') || '{}'), [4]: true})); this.textContent='⭐ 已点亮！'; this.disabled=true; this.style.background='linear-gradient(135deg,#5bb37a,#7ed09a)'; window.dispatchEvent(new CustomEvent('cs336-progress'))">🏅 我学完啦，点亮这颗星！</button>
+

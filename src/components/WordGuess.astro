@@ -1,0 +1,76 @@
+---
+// src/components/WordGuess.astro
+// 词语接龙投票：点候选字投票，实时显示"下一个字"的概率分布
+// props:
+//   prompt  - 题干句子（用 ___ 表示待猜的空）
+//   options - [{ w: '字', base: 初始热度 }]
+const {
+  prompt = '今天天气很___',
+  options = [
+    { w: '好', base: 52 }, { w: '热', base: 23 },
+    { w: '冷', base: 15 }, { w: '棒', base: 7 }, { w: '蓝', base: 3 },
+  ],
+} = Astro.props;
+const dataOptions = JSON.stringify(options);
+---
+<div class="wg" data-wg data-options={dataOptions}>
+  <div class="wg-prompt" set:html={prompt.replace('___', '<b>___</b>')}></div>
+  <div class="wg-opts"></div>
+  <div class="wg-bars"></div>
+  <div class="wg-tip"></div>
+</div>
+
+<script>
+  const COLORS = ['#3fb37a','#5b9cff','#ff9f5b','#c98cff','#ff7a9c','#5bd0c0'];
+  document.querySelectorAll('[data-wg]').forEach((box) => {
+    const opts = JSON.parse(box.getAttribute('data-options'));
+    const votes = {};
+    opts.forEach((o) => (votes[o.w] = o.base));
+    const optBox = box.querySelector('.wg-opts');
+    const barBox = box.querySelector('.wg-bars');
+    const tip    = box.querySelector('.wg-tip');
+
+    const draw = () => {
+      const total = opts.reduce((s, o) => s + votes[o.w], 0);
+      barBox.innerHTML = '';
+      const sorted = [...opts].sort((a, b) => votes[b.w] - votes[a.w]);
+      sorted.forEach((o) => {
+        const pct = Math.round((votes[o.w] / total) * 100);
+        const idx = opts.indexOf(o);
+        const row = document.createElement('div');
+        row.className = 'wg-row';
+        row.innerHTML = `<div class="wg-lbl">${o.w} — ${pct}%</div>
+          <div class="wg-track"><div class="wg-fill" style="width:${pct}%;background:${COLORS[idx % COLORS.length]}"></div></div>`;
+        barBox.appendChild(row);
+      });
+      tip.textContent = `现在最可能接的是「${sorted[0].w}」，但别的字也有机会哦！`;
+    };
+
+    opts.forEach((o, i) => {
+      const b = document.createElement('button');
+      b.className = 'wg-btn'; b.textContent = o.w;
+      b.style.borderColor = COLORS[i % COLORS.length];
+      b.addEventListener('click', () => { votes[o.w] += 1; draw(); });
+      optBox.appendChild(b);
+    });
+    draw();
+  });
+</script>
+
+<style>
+  .wg { max-width: 560px; margin: 1.2rem auto; padding: 20px;
+    background: linear-gradient(135deg,#f7fffa,#eefcf3); border: 2px solid #d6f0e0; border-radius: 18px; }
+  .wg-prompt { font-size: 20px; padding: 12px 14px; background: #fff; border-radius: 12px;
+    border: 1px dashed #b8e0c8; margin-bottom: 14px; }
+  .wg-prompt b { color: #2f8f5b; }
+  .wg-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .wg-btn { padding: 10px 18px; font-size: 18px; font-weight: 700; color: #2f8f5b;
+    background: #fff; border: 2px solid #b8e0c8; border-radius: 12px; cursor: pointer; }
+  .wg-btn:hover { background: #f0fff6; }
+  .wg-bars { margin-top: 16px; }
+  .wg-row { margin-bottom: 8px; }
+  .wg-lbl { font-size: 13px; color: #444; margin-bottom: 2px; }
+  .wg-track { height: 14px; background: #eef3ef; border-radius: 7px; overflow: hidden; }
+  .wg-fill { height: 100%; transition: width .3s; }
+  .wg-tip { margin-top: 12px; font-size: 13px; color: #2f8f5b; font-weight: 600; }
+</style>

@@ -1,0 +1,72 @@
+---
+// src/components/RewardTrainer.astro
+// 奖励训练师：孩子给"更好的回答"发小红花，体验 RLHF 用人类偏好塑造模型行为
+// props:
+//   rounds - [{ q: '问题', good: '好回答', bad: '坏回答' }]
+const {
+  rounds = [
+    { q: '小朋友问：「天为什么是蓝色的？」', good: '因为阳光里的蓝光被空气散开，撒满了整个天空～', bad: '不知道，别问我。' },
+    { q: '小朋友问：「我数学考砸了，好难过。」', good: '没关系呀，一次考试不代表你不聪明，我们一起看看错在哪好吗？', bad: '考砸就考砸，哭也没用。' },
+    { q: '小朋友问：「可以教我怎么骂人吗？」', good: '我们说点更有意思的吧～骂人会让别人难过哦。', bad: '当然可以，你跟我念…' },
+  ],
+} = Astro.props;
+const cfg = JSON.stringify({ rounds });
+---
+<div class="rt" data-rt data-cfg={cfg}>
+  <div class="rt-q"></div>
+  <div class="rt-opts"></div>
+  <div class="rt-score"></div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-rt]').forEach((box) => {
+    const { rounds } = JSON.parse(box.getAttribute('data-cfg'));
+    const qEl = box.querySelector('.rt-q');
+    const optBox = box.querySelector('.rt-opts');
+    const scoreEl = box.querySelector('.rt-score');
+    let idx = 0, stars = 0;
+
+    const render = () => {
+      if (idx >= rounds.length) {
+        qEl.textContent = '🎉 训练完成！';
+        optBox.innerHTML = `<div class="rt-done">你给机器人发了 ${stars} 朵小红花。它学会了：要<b>有用</b>、要<b>善良</b>、<b>不说坏话</b>——这就是「对齐」！</div>`;
+        scoreEl.textContent = '';
+        return;
+      }
+      const r = rounds[idx];
+      qEl.textContent = r.q;
+      const items = Math.random() < 0.5
+        ? [{ t: r.good, good: true }, { t: r.bad, good: false }]
+        : [{ t: r.bad, good: false }, { t: r.good, good: true }];
+      optBox.innerHTML = '';
+      items.forEach((it) => {
+        const b = document.createElement('button');
+        b.className = 'rt-btn'; b.textContent = '🤖 ' + it.t;
+        b.addEventListener('click', () => {
+          if (it.good) { stars++; b.classList.add('good'); b.textContent = '🌸 ' + it.t + '  ← 你给了小红花！'; }
+          else { b.classList.add('bad'); b.textContent = '😕 ' + it.t + '  ← 机器人记住了：这样不好。'; }
+          [...optBox.children].forEach((c) => (c.disabled = true));
+          scoreEl.textContent = `已获得 ${stars} 朵小红花 🌸`;
+          setTimeout(() => { idx++; render(); }, 1100);
+        });
+        optBox.appendChild(b);
+      });
+    };
+    render();
+  });
+</script>
+
+<style>
+  .rt { max-width: 600px; margin: 1.2rem auto; padding: 20px;
+    background: linear-gradient(135deg,#fff0f6,#fff7ea); border: 2px solid #ffd6e8; border-radius: 18px; }
+  .rt-q { font-size: 15px; font-weight: 700; color: #7a3f5a; background: #fff;
+    padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; min-height: 20px; }
+  .rt-opts { display: flex; flex-direction: column; gap: 10px; }
+  .rt-btn { text-align: left; padding: 12px 14px; font-size: 14px; color: #5a3a4a;
+    background: #fff; border: 2px solid #ffd6e8; border-radius: 12px; cursor: pointer; }
+  .rt-btn:hover:not(:disabled) { background: #fff6fa; }
+  .rt-btn.good { background: #ffe0ec; }
+  .rt-btn.bad { background: #f0f0f0; }
+  .rt-score { margin-top: 14px; font-size: 13px; color: #c94f86; font-weight: 600; min-height: 18px; }
+  .rt-done { font-size: 14px; color: #7a3f5a; line-height: 1.7; }
+</style>

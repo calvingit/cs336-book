@@ -1,0 +1,13 @@
+---
+const { emoji = '💡', title = '' } = Astro.props;
+---
+<aside class="callout">
+  <div class="callout-head"><span class="callout-emoji">{emoji}</span>{title && <strong>{title}</strong>}</div>
+  <div class="callout-body"><slot /></div>
+</aside>
+<style>
+  .callout { margin: 1.2rem 0; padding: 14px 16px; border-radius: 14px; background: #fff8fd; border: 2px solid #ffe0f0; }
+  .callout-head { display: flex; align-items: center; gap: 8px; font-size: 15px; color: #7a3fb0; margin-bottom: 6px; }
+  .callout-emoji { font-size: 20px; }
+  .callout-body { font-size: 14px; line-height: 1.7; color: #444; }
+</style>

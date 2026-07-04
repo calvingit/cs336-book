@@ -1,0 +1,106 @@
+---
+title: "第二关：教电脑玩词语接龙"
+description: 大语言模型最核心的秘密——它其实就是在猜下一个字。
+sidebar:
+  order: 2
+  badge: { text: 第2关, variant: tip }
+---
+
+import LayerTabs from '../../../components/LayerTabs.astro';
+import WordGuess from '../../../components/WordGuess.astro';
+import PyRunner from '../../../components/PyRunner.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Callout emoji="🎯">
+**这一关你会学到：** 世界上最厉害的聊天机器人，其实一直在玩一个游戏——**猜下一个字**。
+**预计好玩时间：** 大约 18 分钟。
+</Callout>
+
+<LayerTabs>
+
+<Fragment slot="play">
+
+## 🎮 先来玩个游戏
+
+我说半句话，你来接下一个字：「今天天气很___」。
+你脑子里是不是马上蹦出「好」？但也可能是「热」「冷」——**每个字的可能性不一样大**。
+
+点点看下面的字，给你觉得最可能的那个投一票 👇
+
+<WordGuess
+  prompt="今天天气很___"
+  options={[
+    { w: '好', base: 52 }, { w: '热', base: 23 },
+    { w: '冷', base: 15 }, { w: '棒', base: 7 }, { w: '蓝', base: 3 },
+  ]}
+/>
+
+看那些长短不一的彩色条了吗？**越长的字，越可能被接上。**
+大语言模型干的事一模一样：它读前面的话，然后心里给每个可能的下一个字打个分，分越高越可能说出来。
+
+**动手玩一玩：** 换个题目自己想——「我最喜欢吃___」，你会给哪些字画长条？为什么「蓝」这种字条这么短？
+
+<Callout emoji="🎲" title="一个有趣的问题">
+如果机器人**每次都只挑最长的那个字**，它说的话会怎样？——会变得又死板又无聊，永远只会说同一句！
+所以聪明的机器人会**偶尔挑挑短条的字**，这样它讲的话才有新鲜感。这就是为什么你每次问 AI 同一个问题，它的回答都不太一样。
+</Callout>
+
+<Callout emoji="✏️" title="离屏小实验（可打印）">
+全班一起玩：老师说「从前有一座___」，每人写下自己接的字，然后统计——哪个字被写得最多？把它画成一根最长的条。你们刚才就手动画出了一个「概率分布」！
+</Callout>
+
+</Fragment>
+
+<Fragment slot="do">
+
+## 🔧 自己跑一段真代码
+
+下面这段真代码，让电脑来玩接龙。它心里存了每个字的「分数」，分越高越容易被抽中。
+**试着把 `temperature`（活泼度）从 `0.3` 改成 `2.0` 再运行几次**，看看机器人变得多爱说冷门字！
+
+<PyRunner code={`import random
+
+# 每个字的"分数"，分越高越可能被接上
+scores = {"好": 52, "热": 23, "冷": 15, "棒": 7, "蓝": 3}
+
+temperature = 0.3   # 活泼度：越小越死板，越大越爱挑冷门字
+
+# 根据活泼度调整分数
+words = list(scores.keys())
+weights = [scores[w] ** (1 / temperature) for w in words]
+
+# 玩 8 次接龙，看看机器人每次接什么
+print("今天天气很…… 机器人接了 8 次：")
+for i in range(8):
+    pick = random.choices(words, weights=weights, k=1)[0]
+    print("  第", i + 1, "次 →", pick)`} />
+
+**观察：** `temperature` 很小时，机器人几乎每次都说「好」；调大后，「冷」「蓝」也开始冒出来了。
+这个「活泼度」有个真名字，就叫 **温度（temperature）**——你用的每个 AI 聊天工具背后都有它。
+
+</Fragment>
+
+<Fragment slot="deep">
+
+## 📚 想钻得更深？
+
+刚才玩的这个游戏，就是**语言模型（Language Model）的全部本质**：给定前面的词，预测下一个词的**概率分布**。
+
+- **数学上**，模型在算下一条词的条件概率：P(下一个词 | 前面所有词)，然后从这个分布里采样，逐词循环就"写"出了整段话。
+- **温度采样**：把每个词的分数 zᵢ 变成概率 pᵢ = exp(zᵢ/T) / Σⱼ exp(zⱼ/T)。采样温度 T 越小分布越尖（几乎只选最高分），越大越平（更随机）。
+- 📄 对应课程：**L1 — 课程概述 & Tokenization**(语言模型定义与采样部分)
+- 💻 对应作业：**作业 1**——你会亲手实现从模型输出里采样、生成文本的循环
+- 🔗 延伸：Shannon 1950《Prediction and Entropy of Printed English》——70 多年前就有人研究"猜下一个字母"了，这是语言模型的思想源头
+
+</Fragment>
+
+</LayerTabs>
+
+<Callout emoji="🏅">
+**恭喜通关！** 点亮第二颗星 ⭐⭐
+你已经懂了 AI 最核心的秘密：**它一直在猜下一个字**。
+下一关：**《机器人的眼睛看哪里》**——它读长句子时，怎么知道「它」指的是谁？
+</Callout>
+
+<button id="done-btn-2" class="done-btn" onclick="localStorage.setItem('cs336kids_progress', JSON.stringify({...JSON.parse(localStorage.getItem('cs336kids_progress') || '{}'), [2]: true})); this.textContent='⭐ 已点亮！'; this.disabled=true; this.style.background='linear-gradient(135deg,#5bb37a,#7ed09a)'; window.dispatchEvent(new CustomEvent('cs336-progress'))">🏅 我学完啦，点亮这颗星！</button>
+

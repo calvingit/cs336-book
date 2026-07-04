@@ -1,0 +1,74 @@
+---
+title: "第一关：电脑怎么把字变成积木？"
+description: 教机器人读字的第一步——把句子切成一小块一小块。
+sidebar:
+  order: 1
+  badge: { text: 第1关, variant: tip }
+---
+
+import LayerTabs from '../../../components/LayerTabs.astro';
+import TokenChopper from '../../../components/TokenChopper.astro';
+import PyRunner from '../../../components/PyRunner.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Callout emoji="🎯">
+**这一关你会学到：** 电脑看不懂一整句话，它得先把话切成一小块一小块再读。
+**预计好玩时间：** 大约 15 分钟。
+</Callout>
+
+<LayerTabs>
+
+<Fragment slot="play">
+
+## 🎮 先来玩个游戏
+
+想象你有一大盒乐高。你不会一次抓一整盒，而是**一块一块**地拿。
+电脑读句子也一样——它得先把句子**剪成一小块一小块**，每一块叫「Token（积木块）」。
+
+在框里打句话，看看电脑怎么切它 👇
+
+<TokenChopper />
+
+**动手玩一玩：** 打「你好呀」数几块？打长句子块数会变多吗？打 `hello` 和中文切得一样吗？
+
+<Callout emoji="✏️" title="离屏小实验（可打印）">
+找一段故事，用笔圈出**最常一起出现的两个字**，粘成一块；再找下一对再粘。做 5 次——你做的事和电脑一模一样！
+</Callout>
+
+</Fragment>
+
+<Fragment slot="do">
+
+## 🔧 自己跑一段真代码
+
+下面是真的 Python，点「▶ 运行」就能在浏览器里跑。试着把句子改成你的名字再运行！
+
+<PyRunner code={`sentence = "今天天气真好"
+tokens = list(sentence)   # 把句子切成一块一块
+print("切出的积木：", tokens)
+print("一共", len(tokens), "块")`} />
+
+改完再跑一次，看看数字怎么变。这就是最简单的「分词器」。
+
+</Fragment>
+
+<Fragment slot="deep">
+
+## 📚 想钻得更深？
+
+刚才的游戏，真名叫 **分词（Tokenization）**。真实模型用一种叫 **BPE** 的方法：不断数「哪两个块最常挨着」，把它们合并，重复上万次，于是「天气」会变成一整块。
+
+- 📄 对应课程：**L1 — 课程概述 & Tokenization**
+- 💻 对应作业：**作业 1：实现你自己的 BPE 分词器**
+- 🔗 想看工业级实现，可研究 GPT-2 的 byte-level BPE
+
+</Fragment>
+
+</LayerTabs>
+
+<Callout emoji="🏅">
+**恭喜通关！** 点亮第一颗星 ⭐  下一关：**《词语接龙大师》**——教电脑猜下一个字！
+</Callout>
+
+<button id="done-btn-1" class="done-btn" onclick="localStorage.setItem('cs336kids_progress', JSON.stringify({...JSON.parse(localStorage.getItem('cs336kids_progress') || '{}'), [1]: true})); this.textContent='⭐ 已点亮！'; this.disabled=true; this.style.background='linear-gradient(135deg,#5bb37a,#7ed09a)'; window.dispatchEvent(new CustomEvent('cs336-progress'))">🏅 我学完啦，点亮这颗星！</button>
+

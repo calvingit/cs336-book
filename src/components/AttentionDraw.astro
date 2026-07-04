@@ -1,0 +1,104 @@
+---
+// src/components/AttentionDraw.astro
+// 注意力连线：点击词，画出"它"指向该词的连线并判对错；答对后展示注意力热力条
+// props:
+//   words   - 字数组
+//   target  - 待理解词（如"它"）的索引
+//   answer  - 正确指向的索引
+//   weights - 答对后展示的注意力分布 { 词索引: 权重百分比 }
+const {
+  words = ['小','猫','追','着','毛','线','球','，','因','为','它','很','好','奇'],
+  target = 10,
+  answer = 1,
+  weights = { 0: 8, 1: 62, 2: 10, 6: 12, 13: 8 },
+} = Astro.props;
+const cfg = JSON.stringify({ words, target, answer, weights });
+---
+<div class="att" data-att data-cfg={cfg}>
+  <div class="att-stage">
+    <svg class="att-svg" aria-hidden="true"></svg>
+    <div class="att-words"></div>
+  </div>
+  <div class="att-msg"></div>
+  <div class="att-heat"></div>
+</div>
+
+<script>
+  const OK = '#c7f0d0', NO = '#ffe0e0', BASE = '#f4f4f8', TARGET = '#ffd9c7';
+  document.querySelectorAll('[data-att]').forEach((box) => {
+    const { words, target, answer, weights } = JSON.parse(box.getAttribute('data-cfg'));
+    const svg     = box.querySelector('.att-svg');
+    const wordBox = box.querySelector('.att-words');
+    const msg     = box.querySelector('.att-msg');
+    const heat    = box.querySelector('.att-heat');
+    const spans = [];
+
+    words.forEach((w, i) => {
+      const s = document.createElement('span');
+      s.className = 'att-word'; s.textContent = w;
+      const isT = i === target;
+      s.style.background = isT ? TARGET : BASE;
+      s.style.color = isT ? '#e0602f' : '#333';
+      s.style.fontWeight = isT ? '700' : '400';
+      if (!isT) s.addEventListener('click', () => choose(i));
+      wordBox.appendChild(s); spans.push(s);
+    });
+
+    const drawLine = (i) => {
+      const stage = box.querySelector('.att-stage').getBoundingClientRect();
+      const a = spans[target].getBoundingClientRect();
+      const b = spans[i].getBoundingClientRect();
+      const x1 = a.left + a.width / 2 - stage.left, y1 = a.top - stage.top;
+      const x2 = b.left + b.width / 2 - stage.left, y2 = b.top - stage.top;
+      svg.setAttribute('width', stage.width); svg.setAttribute('height', stage.height);
+      svg.innerHTML = `<path d="M${x1},${y1} C${x1},${y1-40} ${x2},${y2-40} ${x2},${y2}"
+        fill="none" stroke="#e0602f" stroke-width="2.5" stroke-linecap="round"/>`;
+    };
+
+    const showHeat = () => {
+      heat.innerHTML = '<div class="att-heat-title">🤖 机器人读「它」时，眼睛在每个词上用的力气：</div>';
+      Object.entries(weights).sort((a,b)=>b[1]-a[1]).forEach(([idx, pct]) => {
+        const row = document.createElement('div');
+        row.className = 'att-heat-row';
+        row.innerHTML = `<span class="att-heat-w">${words[idx]}</span>
+          <div class="att-heat-track"><div class="att-heat-fill" style="width:${pct}%"></div></div>
+          <span class="att-heat-pct">${pct}%</span>`;
+        heat.appendChild(row);
+      });
+    };
+
+    const choose = (i) => {
+      spans.forEach((s, k) => { if (k !== target) s.style.background = BASE; });
+      spans[i].style.background = (i === answer) ? OK : NO;
+      drawLine(i);
+      if (i === answer) {
+        msg.textContent = '🎉 答对啦！读到「它」，眼睛就要回头看「' + words[answer] + '」。';
+        showHeat();
+      } else {
+        msg.textContent = '再想想～「它」在说谁呢？再点点看。';
+        heat.innerHTML = '';
+      }
+    };
+
+    msg.textContent = '点一个词试试：机器人读「它」时，该回头看哪个词？';
+    window.addEventListener('resize', () => { svg.innerHTML = ''; });
+  });
+</script>
+
+<style>
+  .att { max-width: 600px; margin: 1.2rem auto; padding: 20px;
+    background: linear-gradient(135deg,#fff8f0,#f0f4ff); border: 2px solid #ffe0c8; border-radius: 18px; }
+  .att-stage { position: relative; background: #fff; border-radius: 12px; padding: 28px 8px 12px; }
+  .att-svg { position: absolute; inset: 0; pointer-events: none; }
+  .att-words { display: flex; flex-wrap: wrap; gap: 6px; position: relative; }
+  .att-word { display: inline-block; padding: 8px 10px; font-size: 18px; border-radius: 8px;
+    cursor: pointer; transition: background .15s; }
+  .att-msg { margin-top: 12px; font-size: 13px; color: #c9702f; font-weight: 600; min-height: 20px; }
+  .att-heat { margin-top: 14px; }
+  .att-heat-title { font-size: 13px; color: #7a5030; margin-bottom: 8px; }
+  .att-heat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .att-heat-w { width: 28px; font-size: 16px; text-align: center; }
+  .att-heat-track { flex: 1; height: 14px; background: #f0eae4; border-radius: 7px; overflow: hidden; }
+  .att-heat-fill { height: 100%; background: linear-gradient(90deg,#ffb37a,#e0602f); transition: width .4s; }
+  .att-heat-pct { width: 36px; font-size: 12px; color: #a9764f; text-align: right; }
+</style>
